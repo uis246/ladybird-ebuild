@@ -2,9 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=8
-LLVM_COMPAT=( 18 19 )
-LLVM_OPTIONAL="yeah"
-inherit git-r3 llvm-r1
+inherit git-r3 toolchain-funcs
 
 DESCRIPTION="Graphics engine for Chrome, Firefox, Ladybird, Android, Flutter"
 HOMEPAGE="https://skia.org"
@@ -34,17 +32,11 @@ RDEPEND="${DEPEND}"
 # spirv_validation is disabled, also, what is this thing?
 BDEPEND="
 	dev-build/gn
-	clang? (
-		$(llvm_gen_dep '
-			llvm-core/clang:${LLVM_SLOT}=
-			llvm-core/llvm:${LLVM_SLOT}=
-		')
-	)
 	dev-util/spirv-tools
 	dev-util/patchelf
 "
 
-IUSE="clang vulkan"
+IUSE="vulkan"
 
 PATCHES=(
 	# a temporary need
@@ -90,13 +82,8 @@ skcms_disable_hsw=true \
 skcms_disable_skx=true \
 "
 
-	if use clang ; then
-		_LL_BIN="/usr/lib/llvm/${LLVM_SLOT}/bin/"
-		export CC="${_LL_BIN}clang"
-		export CXX="${_LL_BIN}clang++"
-		#myskiaargs+="cc=\"${CC}\" cxx=\"${CXX}\" "
-		myskiaargs+="cc=\"clang\" cxx=\"clang++\" "
-	fi
+	myskiaargs+="cc=\"$(tc-getCC)\" cxx=\"$(tc-getCXX)\" "
+
 	gn gen out --args="${myskiaargs}" || die "gn failed"
 }
 
@@ -186,38 +173,3 @@ Libs: -L${ABILIBDIR} -lskia
 EOF
 	einstalldocs
 }
-
-# skia_use_system_expat
-#    Current value (from the default)=false
-#      From //third_party/expat/BUILD.gn:7
-#skia_use_system_freetype2
-#    Current value (from the default)=true
-#      From //third_party/freetype2/BUILD.gn:11
-#skia_use_system_harfbuzz
-#    Current value=true
-#      From //out/args.gn:5
-#    Overridden from the default=false
-#      From //third_party/harfbuzz/BUILD.gn:10
-#skia_use_system_icu
-#    Current value=true
-#      From //out/args.gn:7
-#    Overridden from the default=false
-#      From //third_party/icu/icu.gni:7
-#
-#skia_use_system_libjpeg_turbo
-#    Current value (from the default)=false
-#      From //third_party/libjpeg-turbo/BUILD.gn:7
-#
-#skia_use_system_libpng
-#    Current value (from the default)=false
-#      From //third_party/libpng/BUILD.gn:7
-#
-#skia_use_system_libwebp
-#    Current value (from the default)=false
-#      From //third_party/libwebp/BUILD.gn:7
-#
-#skia_use_system_zlib
-#    Current value (from the default)=false
-#      From //third_party/zlib/zlib.gni:7
-#
-#
