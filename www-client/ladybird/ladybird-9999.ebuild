@@ -83,6 +83,7 @@ src_configure() {
 		-DENABLE_NETWORK_DOWNLOADS=OFF
 		-DSERENITY_CACHE_DIR=${BUILD_DIR}/downloads
 		-DWITH_VULKAN=$(usex vulkan ON OFF)
+		-DLAGOM_USE_LINKER
 	)
 	mkdir -p ${BUILD_DIR}/downloads/CACERT/ || die "unable to mkdir"
 	mkdir -p ${BUILD_DIR}/downloads/PublicSuffix/ || die "unable to mkdir"
